@@ -1,0 +1,9 @@
+fail
+Fail
+failed
+Failed
+refuse
+Refuse
+authentication failed
+Access denied for user
+Cannot log in to the MySQL server
