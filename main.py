@@ -17,37 +17,85 @@ from multiprocessing import Pool
 
 #def setArgs():
 
-def genIpList(ipSubStr):
+def valiteIp(subIpStr):
+    tmp = subIpStr.split('.')
+    if 4 != len(tmp):
+        return False
+    for i in tmp:
+        if False == i.isdigit():
+            return False
+
+    return True
+
+def genIpSubFromSlash(ipSubStr):
     result = []
-    if '/' in ipSubStr:
-        tmp = ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('/') 
-        if '24' == tmp[4]:
-            for i in range(1, 255, 1):
-                ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
-                result.append(ip)
-        elif '16' == tmp[4]:
-            for i in range(0, 255, 1):
-                for j in range(1, 255, 1):
-                    ip = tmp[0] + '.' + tmp[1] + '.' + str(i) + '.' + str(j)
-                    result.append(ip)
-        elif '8' == tmp[4]:
-            for i in range(0, 255, 1):
-                for j in range(0, 255, 1):
-                    for k in range(1, 255, 1):
-                        ip = tmp[0] + '.' + str(i) + '.' + str(j) + '.' + str(k)
-                        result.append(ip)
-        else:
+    tmp = ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('/')
+    for i in tmp:
+        if False == i.isdigit():
             return result
 
-    elif '-' in ipSubStr:
-        tmp = ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('-') 
-        for i in range(int(tmp[3]), (int(tmp[4]) + 1), 1):
+    if '24' == tmp[4]:
+        for i in range(1, 255, 1):
             ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
             result.append(ip)
+    elif '16' == tmp[4]:
+        for i in range(0, 255, 1):
+            for j in range(1, 255, 1):
+                ip = tmp[0] + '.' + tmp[1] + '.' + str(i) + '.' + str(j)
+                result.append(ip)
+    elif '8' == tmp[4]:
+        for i in range(0, 255, 1):
+            for j in range(0, 255, 1):
+                for k in range(1, 255, 1):
+                    ip = tmp[0] + '.' + str(i) + '.' + str(j) + '.' + str(k)
+                    result.append(ip)
     else:
         return result
+    return result
+
+def genIpSubFromComma(subIpStr):
+    result = []
+    if None == subIpStr or '' == subIpStr:
+        return result
+
+    tmp = subIpStr.split(',')
+
+    for i in tmp:
+        if '/' in i:
+            tmp1 = genIpSubFromSlash(i)
+            if None == tmp1:
+                continue
+            else:
+                result += tmp1
+        elif '-' in i:
+            tmp2 = genIpSubFromBar()
+            if None == tmp2:
+                continue
+            else:
+                result += tmp2
+        elif True == valiteIp(i):
+            result.append(i)
+        else:
+            continue
+    return result
+
+
+
+def genIpSubFromBar(ipSubStr):
+    result = []
+    tmp = ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('-') 
+    #if 
+    for i in tmp:
+        if False == i.isdigit():
+            return result
+
+    for i in range(int(tmp[3]), (int(tmp[4]) + 1), 1):
+        ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
+        result.append(ip)
 
     return result
+def genIpList(ipSubStr):
+    return genIpSubFromComma(ipSubStr)
 
 def isHostLiving(ip):
     try:
@@ -305,10 +353,10 @@ def subWorkers(subIpList, dirList, bruteDirThreadConfig):
         for thread in threads:
             thread.setDaemon(True)
             thread.start()
-#            thread.join()
+            thread.join()
             #time.sleep(1)
-        while True:
-            pass
+#        while True:
+#            pass
 
     except Exception, e:
         sys.stdout.write(str(e) + '\n')
@@ -439,8 +487,6 @@ if __name__ == '__main__':
             pool.apply_async(subWorkers, args=(subIpList, dirList, bruteDirThreadConfig, ))
 
     pool.close()
-#    pool.join()
-    while True:
-        pass
-
-
+    pool.join()
+#    while True:
+#        pass
