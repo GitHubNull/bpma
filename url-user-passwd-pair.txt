@@ -1,1 +1,1 @@
-http://121.127.234.45/phpMyAdmin//index.php|root|root
+http://121.127.9.136/phpMyAdmin//index.php|root|admin
