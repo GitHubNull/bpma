@@ -1,0 +1,1 @@
+http://121.127.234.45/phpMyAdmin//index.php|root|root

