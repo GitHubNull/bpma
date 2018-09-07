@@ -1,1 +1,11 @@
 phpMyAdmin
+index.php
+phpmyadmin
+dh_phpmyadmin
+dh_phpMyAdmin
+_phpmyadmin
+_phpMyAdmin
+phpmyadmin2
+phpMyAdmin2
+phpmyadmin3
+phpMyAdmin3

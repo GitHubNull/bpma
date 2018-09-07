@@ -152,16 +152,24 @@ def genIpSubFromBar(ipSubStr):
     return result
 
 def genIpList(ipSubStr, port):
+    result = []
     tmp = genIpSubFromComma(ipSubStr)
 #    for i in tmp:
 #        print i
-    if None != tmp and 0 < len(tmp) and '80' != port:
-        for i in range(len(tmp)):
+    length = len(tmp)
+    if None != tmp and 0 < length and '80' != port:
+        ports = port.split(',')
+        for i in range(length):
             if ':' not in tmp[i]:
-                tmp[i] = tmp[i] + ':' + port
+                for j in ports:
+                    ip = tmp[i] + ':' + j
+                    result.append(ip)
+            else:
+                result.append(tmp[i])
+    else:
+        result += tmp
 
-
-    return tmp
+    return result 
 
 
 
@@ -339,6 +347,7 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
     baseUrl = url
 
     for dirItem in dirList:
+        url = baseUrl
         
         if '/' != dirItem[0]: 
             url = url + '/' + dirItem
@@ -346,7 +355,8 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
             url = url + dirItem 
         
         if '/' != url[-1]:
-            url = url + '/'
+            if '.php' != url[-4:]:
+                url = url + '/'
 
         try:
             
@@ -360,10 +370,18 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                     actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
                     if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
                         if 'http://' != actionUrl[0:7]  and 'https://' != actionUrl[0:8]:
-                            if '/' != actionUrl[0]:
-                                actionUrl = url + '/' + actionUrl
+                            if '.php' not in url: 
+                                if '/' != actionUrl[0]:
+                                    actionUrl = url + actionUrl
+                                else:
+                                    actionUrl = url[0:-1] + actionUrl
                             else:
-                                actionUrl = url + actionUrl
+                                if '/' != actionUrl[0]:
+                                    actionUrl = baseUrl + '/' + actionUrl
+                                else:
+                                    actionUrl = baseUrl + actionUrl
+                        else:
+                            sys.stdout.write('---------->\n')
                         
                         t = threading.Thread(target=login, args=(loginThreadConfig, actionUrl, cookies, userName, passwd, otherArgs, ))
                         t.setDaemon(True)
@@ -444,8 +462,8 @@ if __name__ == '__main__':
     parser.add_argument('-dirs', default = 'configs/dirs-lists/dir-list.txt',
                                     help='爆破路径的字典文件.(默认: config/dirs-lists/comment-dirs.txt)')
 
-    parser.add_argument('-users', default = 'configs/users-lists/users-list.txt',
-                                    help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/users-list.txt)')
+    parser.add_argument('-users', default = 'configs/users-lists/comment-list.txt',
+                                    help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/comment-list.txt)')
 
     parser.add_argument('-passwds', default = 'configs/passwds-lists/comment-passwds.txt',
                                     help='指定爆破登录时所使用的密码字典文件.(默认: config/passwds-lists/comment-passwds.txt)')

