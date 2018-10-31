@@ -13,8 +13,6 @@ from termcolor import *
 #import pyping
 import signal
 from multiprocessing import cpu_count
-from multiprocessing import Pool
-from multiprocessing import Process
 import inspect
 
 def valiteIp(subIpStr):
@@ -227,10 +225,14 @@ def isLoginSuccess(resp, proxies):
     #    else:
     #        return False
     if 0 < len(resp.content):
+        if 'location' in resp.headers.keys():
+            print resp.headers['location']
+        if 'Location' in resp.headers.keys():
+            print resp.headers['Location']
 
         html = etree.HTML(resp.content)
         forms = html.xpath('//form[contains(@name,"login")]')
-        if 0 >= len(forms) and 'Warning: ini_set()' not in resp.content:
+        if 0 >= len(forms):
             return True
         else:
             return False
@@ -283,9 +285,7 @@ def login(loginThreadConfig, url, cookies, userName, passwd, otherArgs):
                         sys.stdout.write(logLine)
                         #logfile.writelines(logLine)
                         with open(loginThreadConfig['out'], 'a+') as outFile:
-                            f='{:<60s}{:<18s}{:<18s}\n'
-                            line = f.format(url, uL, pL)
-                            outFile.write(line)
+                            outFile.writelines(url + '|' + uL + '|' + pL + '\n')
                             outFile.close()
                         if 'continue' == loginThreadConfig['fc']:
                             break
@@ -652,9 +652,6 @@ if __name__ == '__main__':
         bruteDirThreadConfig['proxys'] = proxys
 
     if cpuCnt > len(ipList):
-        #proccess = Process(target = subWorkers, args=(cpuCnt, ipList, dirList, bruteDirThreadConfig, ))
-        #proccess.start()
-        #proccess.join()
         subWorkers(cpuCnt, ipList, dirList, bruteDirThreadConfig)
 
     else:
@@ -674,5 +671,3 @@ if __name__ == '__main__':
 
         pool.close()
         pool.join()
-#    while True:
-#        pass
