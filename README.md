@@ -8,3 +8,8 @@
       |_|
 ```
 auto brute phpmyadmin login url and auto brute login username &amp; passwd
+
+## use tutor
+```shell
+python3 bpma.py
+```
